@@ -2,6 +2,7 @@ package hoistyml_test
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/hoistup/hoist/cmd/hoist/hoistyml"
@@ -25,8 +26,11 @@ func TestLoad(t *testing.T) {
 				data := dedent.Dedent(`
 					version: 0.1.0
 
+					stack:
+					  name: my-stack
+
 					services:
-					  myService:
+					  my-service:
 					    type: go
 					    path: my/path
 				`)
@@ -35,9 +39,12 @@ func TestLoad(t *testing.T) {
 			},
 			ExpectedTemplate: &hoistyml.Template{
 				Version: "0.1.0",
+				Stack: hoistyml.Stack{
+					Name: "my-stack",
+				},
 				Services: hoistyml.Services{
-					"myService": {
-						Name: "myService",
+					"my-service": {
+						Name: "my-service",
 						Type: "go",
 						Path: "my/path",
 					},
@@ -64,8 +71,11 @@ func TestLoad(t *testing.T) {
 			Dir:  "my/invalid-stack",
 			Before: func(fs afero.Fs) error {
 				data := dedent.Dedent(`
+					stack:
+					  name: my-stack
+
 					services:
-					  myService:
+					  my-service:
 					    type: go
 					    path: my/path
 				`)
@@ -81,8 +91,11 @@ func TestLoad(t *testing.T) {
 				data := dedent.Dedent(`
 					version: 0.1.1
 
+					stack:
+					  name: my-stack
+
 					services:
-					  myService:
+					  my-service:
 					    type: go
 					    path: my/path
 				`)
@@ -92,14 +105,74 @@ func TestLoad(t *testing.T) {
 			ExpectedError: hoistyml.ErrVersionUnsupported,
 		},
 		{
-			Name: "with invalid service: missing type",
+			Name: "with missing stack info",
 			Dir:  "my/invalid-stack",
 			Before: func(fs afero.Fs) error {
 				data := dedent.Dedent(`
 					version: 0.1.0
 
 					services:
-					  myService:
+					  my-service:
+					    type: go
+					    path: my/path
+				`)
+
+				return afero.WriteFile(fs, "my/invalid-stack/hoist.yml", []byte(data), 0655)
+			},
+			ExpectedError: hoistyml.ErrStackMissingName,
+		},
+		{
+			Name: "with invalid stack name",
+			Dir:  "my/invalid-stack",
+			Before: func(fs afero.Fs) error {
+				data := dedent.Dedent(`
+					version: 0.1.0
+
+					stack:
+					  name: -my-stack
+
+					services:
+					  my-service:
+					    type: go
+					    path: my/path
+				`)
+
+				return afero.WriteFile(fs, "my/invalid-stack/hoist.yml", []byte(data), 0655)
+			},
+			ExpectedError: hoistyml.ErrStackNameInvalid,
+		},
+		{
+			Name: "with invalid service: invalid name",
+			Dir:  "my/invalid-stack",
+			Before: func(fs afero.Fs) error {
+				data := dedent.Dedent(`
+					version: 0.1.0
+
+					stack:
+					  name: my-stack
+
+					services:
+					  -service:
+					    type: go
+					    path: my/path
+				`)
+
+				return afero.WriteFile(fs, "my/invalid-stack/hoist.yml", []byte(data), 0655)
+			},
+			ExpectedError: hoistyml.ErrServiceNameInvalid,
+		},
+		{
+			Name: "with invalid service: missing type",
+			Dir:  "my/invalid-stack",
+			Before: func(fs afero.Fs) error {
+				data := dedent.Dedent(`
+					version: 0.1.0
+
+					stack:
+					  name: my-stack
+
+					services:
+					  my-service:
 					    path: my/path
 				`)
 
@@ -114,8 +187,11 @@ func TestLoad(t *testing.T) {
 				data := dedent.Dedent(`
 					version: 0.1.0
 
+					stack:
+					  name: my-stack
+
 					services:
-					  myService:
+					  my-service:
 					    type: go
 				`)
 
@@ -135,6 +211,7 @@ func TestLoad(t *testing.T) {
 			}
 
 			tmpl, err := hoistyml.Load(fs, entry.Dir)
+			fmt.Println("ERR", err)
 			is.True(errors.Is(err, entry.ExpectedError))
 			is.Equal(tmpl, entry.ExpectedTemplate)
 		})

@@ -14,6 +14,9 @@ func TestTemplateString(t *testing.T) {
 
 		tmpl := &hoistyml.Template{
 			Version: "0.1.0",
+			Stack: hoistyml.Stack{
+				Name: "my-stack",
+			},
 			Services: hoistyml.Services{
 				"svc1": {
 					Name: "svc1",
@@ -25,6 +28,8 @@ func TestTemplateString(t *testing.T) {
 
 		is.Equal(fmt.Sprintf("%v", tmpl),
 			`version: 0.1.0
+stack:
+    name: my-stack
 services:
     svc1:
         type: go
