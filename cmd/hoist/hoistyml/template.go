@@ -5,15 +5,16 @@ import (
 
 	"github.com/JosiahWitt/erk"
 	"github.com/JosiahWitt/erk/erg"
+	"github.com/hoistup/hoist/cmd/hoist/erks"
 	"gopkg.in/yaml.v3"
 )
 
 type (
-	ErkInvalidVersion     erk.DefaultKind
-	ErkUnsupportedVersion erk.DefaultKind
-	ErkInvalidStack       erk.DefaultKind
-	ErkInvalidServices    erk.DefaultKind
-	ErkInvalidService     erk.DefaultKind
+	ErkInvalidVersion     struct{ erks.Default }
+	ErkUnsupportedVersion struct{ erks.Default }
+	ErkInvalidStack       struct{ erks.Default }
+	ErkInvalidServices    struct{ erks.Default }
+	ErkInvalidService     struct{ erks.Default }
 )
 
 var (
