@@ -4,13 +4,14 @@ import (
 	"path/filepath"
 
 	"github.com/JosiahWitt/erk"
+	"github.com/hoistup/hoist/cmd/hoist/erks"
 	"github.com/spf13/afero"
 	"gopkg.in/yaml.v3"
 )
 
 type (
-	ErkUnableToReadFile  erk.DefaultKind
-	ErkUnableToUnmarshal erk.DefaultKind
+	ErkUnableToReadFile  struct{ erks.Default }
+	ErkUnableToUnmarshal struct{ erks.Default }
 )
 
 var (
